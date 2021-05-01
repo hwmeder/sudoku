@@ -1,39 +1,41 @@
 package hwm.sudoku.strategy;
 
-import hwm.sudoku.Cell;
-import hwm.sudoku.Node;
-import hwm.sudoku.Strategy;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import hwm.sudoku.Cell;
+import hwm.sudoku.Node;
+import hwm.sudoku.Strategy;
+
 public class ClosedSetScanner implements Strategy {
 
-  private final Map<Character, Set<Cell>> map;
+  private final Map<Character, Set<Cell>> possibilitiesMap;
+  private final Node container;
 
-  private final Node node;
-
-  public ClosedSetScanner(Map<Character, Set<Cell>> map, Node node) {
-    this.map = map;
-    this.node = node;
+  /**
+   * Looks for a subset of Cells in the specified container to which a set of characters are restricted.
+   * If found, then all other characters in this subset of Cells can be excluded from their possible characters.
+   *
+   * @param possibilitiesMap map of character to the set of possible cells that could contain the character
+   * @param container to be analysed
+   */
+  public ClosedSetScanner(Map<Character, Set<Cell>> possibilitiesMap, Node container) {
+    this.possibilitiesMap = Collections.unmodifiableMap(possibilitiesMap);
+    this.container = container;
   }
 
   public boolean execute() {
     Set<Cell> setOfPossibilities = new HashSet<>();
-    Map<Character, Set<Cell>> mapOfPossibilities = Collections
-        .unmodifiableMap(map);
     Set<Character> chars = new HashSet<>();
-    return check(chars, setOfPossibilities, mapOfPossibilities);
+    return check(chars, setOfPossibilities, this.possibilitiesMap);
   }
 
-  public boolean check(Set<Character> chars, Set<Cell> set,
-      Map<Character, Set<Cell>> possibilitiesMap) {
-    Map<Character, Set<Cell>> map = new HashMap<>(
-        possibilitiesMap);
-    while (!map.keySet().isEmpty()) {
+  private boolean check(Set<Character> chars, Set<Cell> set, Map<Character, Set<Cell>> possibilitiesMap) {
+    Map<Character, Set<Cell>> map = new HashMap<>(possibilitiesMap);
+    while (! map.keySet().isEmpty()) {
       Character c = map.keySet().iterator().next();
       Set<Cell> addedCells = new HashSet<>(map.remove(c));
       addedCells.removeAll(set);
@@ -43,7 +45,7 @@ public class ClosedSetScanner implements Strategy {
       if (set.size() <= chars.size()) {
         boolean change = false;
         for (Cell cell : set) {
-          if (cell.retainAll(chars, node)) {
+          if (cell.retainAll(chars, container)) {
             change = true;
           }
         }

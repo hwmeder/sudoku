@@ -30,6 +30,7 @@ public class WorkbookImpl implements Workbook {
     final Set<Cell> cellSet = new HashSet<>();
     puzzle.build(reporter, nodeSet, cellSet);
     this.puzzle = puzzle;
+    RowColRecAnalysisDriver.setContinueProcessing(false);
   }
 
   /*
@@ -56,6 +57,7 @@ public class WorkbookImpl implements Workbook {
    * @see hwm.sudoku.impl.Workbook#execute(java.util.List)
    */
   public void execute(Strategy strategy) {
+    RowColRecAnalysisDriver.setContinueProcessing(true);
     boolean found = true;
     while (found) {
       found = executeOnce(strategy);

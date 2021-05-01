@@ -13,12 +13,24 @@ import java.util.Set;
 
 public class ContainerImpl extends NodeBaseImpl implements Container {
 
-  private Map<Character, Set<CellImpl>> cmap = new HashMap<>();
+  /**
+   * The map of Cells in this container that possibly could be set to the specified character.
+   */
+  private final Map<Character, Set<CellImpl>> cmap = new HashMap<>();
 
-  private Set<CellImpl> cells = new HashSet<>();
+  /**
+   * The set of Cells contained in this container.
+   */
+  private final Set<Cell> cells = new HashSet<>();
 
-  ContainerImpl(Set<Character> possibilities, Reporter reporter,
-      Object nodeType, String label) {
+  /**
+   * A container of Cells
+   *
+   * @param possibilities full set of possible characters
+   * @param nodeType the name for this type of container
+   * @param label that identifies this container
+   */
+  ContainerImpl(Set<Character> possibilities, String nodeType, String label) {
     super(nodeType, label);
 
     for (Character c : possibilities) {
@@ -26,11 +38,7 @@ public class ContainerImpl extends NodeBaseImpl implements Container {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.Node#addCell(hwm.Cell)
-   */
+  @Override
   public void addCell(CellImpl cell) {
     cells.add(cell);
     for (Character c : cmap.keySet()) {
@@ -38,24 +46,14 @@ public class ContainerImpl extends NodeBaseImpl implements Container {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.Node#getCells()
-   */
-  public Set<CellImpl> getCells() {
+  @Override
+  public Set<Cell> getCells() {
     return cells;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.Node#checkShares(int, boolean)
-   */
+  @Override
   public boolean checkShares() {
     Map<Character, Set<Cell>> map = new HashMap<>();
-    // Map<Character, Set<Node>> rowMap = new HashMap<Character, Set<Node>>();
-    // Map<Character, Set<Node>> colMap = new HashMap<Character, Set<Node>>();
     Map<Object, Map<Character, Set<Container>>> containerMaps = new HashMap<>();
     for (Cell cell : cells) {
       Set<Character> possibilities = cell.getPossibilities();
@@ -86,30 +84,23 @@ public class ContainerImpl extends NodeBaseImpl implements Container {
         }
       }
       return false;
-    } catch (Throwable t) {
-      throw new Error(getName(), t);
+    } catch (Exception e) {
+      throw new RuntimeException(getLabel(), e);
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.Node#remove(hwm.Cell)
-   */
+  @Override
   public void remove(Cell cell) {
     if (cmap.remove(cell.getC()) != null) {
       for (Set<CellImpl> set : cmap.values()) {
+        //noinspection SuspiciousMethodCalls
         set.remove(cell);
       }
-      checkRowColRec(cells);
+      RowColRecAnalysisDriver.checkCells(cells);
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.Node#getPossibilities()
-   */
+  @Override
   public Set<Character> getPossibilities() {
     return cmap.keySet();
   }

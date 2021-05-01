@@ -1,15 +1,14 @@
 package hwm;
 
-import hwm.puzzle.*;
+import java.util.Set;
+
+import hwm.puzzle.Stuck;
 import hwm.sudoku.Container;
 import hwm.sudoku.PuzzleDesc;
 import hwm.sudoku.Strategy;
 import hwm.sudoku.Workbook;
-import hwm.sudoku.impl.ContainerImpl;
 import hwm.sudoku.impl.WorkbookImpl;
 import hwm.sudoku.strategy.NodePossibilityEliminator;
-
-import java.util.Set;
 
 public class Sudoku {
 
@@ -26,26 +25,14 @@ public class Sudoku {
 
   @SuppressWarnings("unused") // Used by GUI clients
   public static void finish(Workbook workbook) {
-    ContainerImpl.setContinueProcessing(true);
-    ContainerImpl.setEliminateFoundC(true);
-    execute(workbook);
+    Set<Container> containers = workbook.getNodes();
+    workbook.execute(new NodePossibilityEliminator(containers));
   }
 
   @SuppressWarnings("unused") // Used by GUI clients
   public static void step(Workbook workbook) {
-    ContainerImpl.setContinueProcessing(false);
-    ContainerImpl.setEliminateFoundC(true);
-    executeOnce(workbook);
-  }
-
-  private static void executeOnce(Workbook workbook) {
     Set<Container> containers = workbook.getNodes();
     workbook.executeOnce(new NodePossibilityEliminator(containers));
-  }
-
-  private static void execute(Workbook workbook) {
-    Set<Container> containers = workbook.getNodes();
-    workbook.execute(new NodePossibilityEliminator(containers));
   }
 
   public static Workbook build(PuzzleDesc puzzleDesc) {
@@ -54,12 +41,10 @@ public class Sudoku {
   }
 
   public static Workbook build(PuzzleDesc puzzleDesc, Reporter reporter) {
-    ContainerImpl.setContinueProcessing(false);
     return new WorkbookImpl(puzzleDesc, reporter);
   }
 
   public static void solve(Workbook workbook, Strategy strategy) {
-    ContainerImpl.setContinueProcessing(true);
     workbook.displayCells();
 
     try {
