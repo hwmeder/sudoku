@@ -16,15 +16,28 @@ public class CellImpl extends NodeBaseImpl implements Cell {
   private Character c;
 
   /**
-   * Set of Node containing this Cell.
+   * Set of containers containing this cell
    */
   private final Set<Container> containers = new HashSet<>();
 
+  /**
+   * Set of possible characters in this cell
+   */
   private final Set<Character> possibilities = new HashSet<>();
 
-  CellImpl(Character c, Set<Character> possibilities, Container row,
-      Container col, Container rec, Reporter reporter, Object nodeType,
-      String label) {
+  /**
+   * @param c character contained by this cell, if it has been determined
+   * @param possibilities set of possible characters in this sell, if it has not been determined yet
+   * @param row the row that contains this cell
+   * @param col column that contains this cell
+   * @param rec rectangle that contains this cell
+   * @param reporter for reporting decisions
+   * @param nodeType name that describes the type of node
+   * @param label describing this cell
+   */
+  CellImpl(Character c, Set<Character> possibilities,
+      Container row, Container col, Container rec,
+      Reporter reporter, String nodeType, String label) {
     super(nodeType, label);
     this.reporter = reporter;
     this.c = c;
@@ -35,32 +48,22 @@ public class CellImpl extends NodeBaseImpl implements Cell {
     this.possibilities.addAll(possibilities);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#checkRowColRec()
-   */
   public boolean checkRowColRec() {
     if (c != null) {
-      return false;
+      return false; // the contents of this cell has already been determined and has not changed
     }
     Set<Character> possibilities = getPossibilities();
-    if (possibilities.size() != 1)
-      return false;
-    Character target = possibilities.iterator().next();
-    if (target == null)
-      throw new Error();
-    setC(target);
-    reporter.printWithPrefix(getName() + " = " + c + " :: checkRowColRec", c
-        + " is the only value that works in " + getName() + ".");
-    return true;
+    if (possibilities.size() != 1) {
+      return false; // the contents of this cell can not be determined yet
+    }
+    setC(possibilities.iterator().next());
+
+    reporter.printWithPrefix(getName() + " = " + c + " :: checkRowColRec",
+        c + " is the only value that works in " + getName() + ".");
+
+    return true; // the contents of this cell has been updated
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#remove()
-   */
   public void remove() {
     possibilities.remove(c);
     for (Container container : containers) {
@@ -69,11 +72,6 @@ public class CellImpl extends NodeBaseImpl implements Cell {
     // remove(this);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#setC(java.lang.Character)
-   */
   public void setC(Character c) {
     this.c = c;
     remove();
@@ -81,54 +79,42 @@ public class CellImpl extends NodeBaseImpl implements Cell {
 
   @Override
   public Set<Character> getPossibilities() {
-    Set<Character> possibilities = new HashSet<>();
     if (c != null)
-      return possibilities;
+      return new HashSet<>(c);
 
-    possibilities.addAll(this.possibilities);
+    Set<Character> possibilities = new HashSet<>(this.possibilities);
     for (Container container : containers) {
       possibilities.retainAll(container.getPossibilities());
     }
     return possibilities;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#retainAll(java.util.Set, java.lang.String)
-   */
-  public boolean retainAll(Set<Character> newSet, Node node) {
+  public boolean retainAll(Set<Character> constrainingPossibilities, Node node) {
     Set<Character> possibilities = getPossibilities();
     Set<Character> removedPossibilities = new HashSet<>(possibilities);
-    if (possibilities.size() <= newSet.size())
+    possibilities.retainAll(constrainingPossibilities);
+    if (possibilities.size() > constrainingPossibilities.size())
+      throw new Error(possibilities.size() + ">" + constrainingPossibilities.size());
+    removedPossibilities.removeAll(constrainingPossibilities);
+    if(removedPossibilities.isEmpty())
       return false;
-    possibilities.retainAll(newSet);
-    if (possibilities.size() > newSet.size())
-      throw new Error(possibilities.size() + ">" + newSet.size());
-    removedPossibilities.removeAll(newSet);
-    this.possibilities.retainAll(newSet);
-    String englishReason = newSet.size() + " cells in " + node.getName()
-        + " can only contain " + newSet + ".  Remove " + removedPossibilities
+    this.possibilities.retainAll(constrainingPossibilities);
+    String englishReason = constrainingPossibilities.size() + " cells in " + node.getName()
+        + " can only contain " + constrainingPossibilities + ".  Remove " + removedPossibilities
         + " from " + getName() + ".";
-    if (newSet.size() == 1) {
-      setC(newSet.iterator().next());
+    if (constrainingPossibilities.size() == 1) {
+      setC(constrainingPossibilities.iterator().next());
       reporter.printWithPrefix(getName() + " = " + c + " : " + node.getName()
-          + " x " + removedPossibilities + " == " + newSet + " :: retainAll",
+          + " x " + removedPossibilities + " == " + constrainingPossibilities + " :: retainAll",
           englishReason);
     } else {
       reporter.printWithPrefix(getName() + " x " + removedPossibilities + " : "
-          + node.getName() + " " + newSet + " :: retainAll", englishReason);
+          + node.getName() + " " + constrainingPossibilities + " :: retainAll", englishReason);
     }
     checkRowColRec(this);
     return true;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#remove(java.lang.Character, hwm.soduku.Container,
-   *      hwm.soduku.Container)
-   */
   public boolean remove(Character c2, Container node, Container crossNode) {
     if (c != null)
       return false;
@@ -157,20 +143,10 @@ public class CellImpl extends NodeBaseImpl implements Cell {
     return false;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#getC()
-   */
   public Character getC() {
     return c;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hwm.soduku.impl.Cell#getContainers()
-   */
   public Set<Container> getContainers() {
     return containers;
   }
