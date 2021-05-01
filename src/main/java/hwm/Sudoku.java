@@ -14,7 +14,7 @@ import java.util.Set;
 public class Sudoku {
 
   public static void main(String[] args) {
-    PuzzleDesc puzzle = new Big();
+    PuzzleDesc puzzle = new Stuck();
     Workbook workbook = build(puzzle);
     solve(workbook);
   }
@@ -24,12 +24,14 @@ public class Sudoku {
     solve(workbook, new NodePossibilityEliminator(containers));
   }
 
+  @SuppressWarnings("unused") // Used by GUI clients
   public static void finish(Workbook workbook) {
     ContainerImpl.setContinueProcessing(true);
     ContainerImpl.setEliminateFoundC(true);
     execute(workbook);
   }
 
+  @SuppressWarnings("unused") // Used by GUI clients
   public static void step(Workbook workbook) {
     ContainerImpl.setContinueProcessing(false);
     ContainerImpl.setEliminateFoundC(true);
