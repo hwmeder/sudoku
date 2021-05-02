@@ -1,5 +1,6 @@
 package hwm;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import hwm.puzzle.Stuck;
@@ -14,8 +15,14 @@ public class Sudoku {
 
   public static void main(String[] args) {
     PuzzleDesc puzzle = new Stuck();
-    Workbook workbook = build(puzzle);
+    final Reporter reporter = new Reporter(System.out);
+    Workbook workbook = build(puzzle, reporter);
+    final String[] problemStr = workbook.getSolutionStr();
     solve(workbook);
+    final String[] solutionStr = workbook.getSolutionStr();
+    reporter.println(Arrays.toString(problemStr));
+    reporter.println(Arrays.toString(solutionStr));
+    reporter.println(Boolean.toString(puzzle.checkSolution(solutionStr)));
   }
 
   public static void solve(Workbook workbook) {
@@ -35,6 +42,7 @@ public class Sudoku {
     workbook.executeOnce(new NodePossibilityEliminator(containers));
   }
 
+  @SuppressWarnings("unused")
   public static Workbook build(PuzzleDesc puzzleDesc) {
     final Reporter reporter = new Reporter(System.out);
     return build(puzzleDesc, reporter);

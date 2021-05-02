@@ -2,7 +2,7 @@ package hwm.puzzle;
 
 import hwm.sudoku.impl.PuzzleDescImpl;
 
-public class Stuck extends PuzzleDescImpl {
+public final class Stuck extends PuzzleDescImpl {
   public Stuck() {
     String[] puzzleStr = { //
     "8.7.9..15", //
@@ -16,5 +16,9 @@ public class Stuck extends PuzzleDescImpl {
     ".6..875..", //
     };
     setPuzzleStrArray(puzzleStr);
+    String[] solutionStrArray = { //
+        "837692415", "156734928", "942815763", "283946157", "574128396", "619573284", "498351672", "725469831", "361287549"
+    };
+    setSolutionStrArray(solutionStrArray);
   }
 }
