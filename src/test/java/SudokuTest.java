@@ -98,6 +98,13 @@ public class SudokuTest {
     }
   }
 
+  /**
+   * https://stackoverflow.com/questions/28678026/how-can-i-get-all-class-files-in-a-specific-package-in-java
+   * Thanks to https://stackoverflow.com/users/2429611/mythbu
+   *
+   * @param packageName to be scanned for classes
+   * @return classes found in the specified package
+   */
   private static List<Class<?>> getClassesInPackage(@SuppressWarnings("SameParameterValue") String packageName) {
     String path = packageName.replaceAll("\\.", File.separator);
     List<Class<?>> classes = new ArrayList<>();
