@@ -3,7 +3,8 @@ package hwm;
 import java.util.Arrays;
 import java.util.Set;
 
-import hwm.puzzle.Stuck;
+import hwm.puzzle.*;
+import hwm.puzzle.Puzzle20210619;
 import hwm.sudoku.Container;
 import hwm.sudoku.PuzzleDesc;
 import hwm.sudoku.Strategy;
@@ -14,7 +15,7 @@ import hwm.sudoku.strategy.NodePossibilityEliminator;
 public class Sudoku {
 
   public static void main(String[] args) {
-    PuzzleDesc puzzle = new Stuck();
+    PuzzleDesc puzzle = new Puzzle20210619();
     final Reporter reporter = new Reporter(System.out);
     Workbook workbook = build(puzzle, reporter);
     final String[] problemStr = workbook.getSolutionStr();
